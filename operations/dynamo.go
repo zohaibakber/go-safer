@@ -34,73 +34,6 @@ func PutItem(sn *[]safer.CompanySnapshot) error {
 	return err
 }
 
-// func generateWriteRequests(snapshots *[]safer.CompanySnapshot) []types.WriteRequest {
-// 	var writeRequests []types.WriteRequest
-
-// 	for _, snapshot := range *snapshots {
-// 		writeRequest := types.WriteRequest{
-// 			PutRequest: &types.PutRequest{
-// 				Item: map[string]types.AttributeValue{
-// 					"pk": &types.AttributeValueMemberS{
-// 						Value: snapshot.MCMXFFNumbers[0],
-// 					},
-// 					"sk": &types.AttributeValueMemberS{
-// 						Value: "type_" + snapshot.EntityType + "#" + "status_" + snapshot.OperatingStatus + "#" + "units_" + strconv.Itoa(snapshot.PowerUnits) + "#" + "drivers_" + strconv.Itoa(snapshot.Drivers),
-// 					},
-// 					"dotNumber": &types.AttributeValueMemberS{
-// 						Value: snapshot.DOTNumber,
-// 					},
-// 					"dbaName": &types.AttributeValueMemberS{
-// 						Value: snapshot.DBAName,
-// 					},
-// 					"address": &types.AttributeValueMemberS{
-// 						Value: snapshot.PhysicalAddress,
-// 					},
-// 					"entityType": &types.AttributeValueMemberS{
-// 						Value: snapshot.EntityType,
-// 					},
-// 					"operationStatus": &types.AttributeValueMemberS{
-// 						Value: snapshot.OperatingStatus,
-// 					},
-// 					"legalName": &types.AttributeValueMemberS{
-// 						Value: snapshot.LegalName,
-// 					},
-// 					"mailingAddress": &types.AttributeValueMemberS{
-// 						Value: snapshot.MailingAddress,
-// 					},
-// 					"phone": &types.AttributeValueMemberS{
-// 						Value: snapshot.Phone,
-// 					},
-// 					"mcs150Year": &types.AttributeValueMemberS{
-// 						Value: snapshot.MCS150Year,
-// 					},
-// 					"drivers": &types.AttributeValueMemberS{
-// 						Value: strconv.Itoa(snapshot.Drivers),
-// 					},
-// 					"powerUnits": &types.AttributeValueMemberS{
-// 						Value: strconv.Itoa(snapshot.PowerUnits),
-// 					},
-// 					"stateCarrierId": &types.AttributeValueMemberS{
-// 						Value: snapshot.StateCarrierID,
-// 					},
-// 					"mcmxNumbers": &types.AttributeValueMemberSS{
-// 						Value: snapshot.MCMXFFNumbers,
-// 					},
-// 					"latestUpdate": &types.AttributeValueMemberS{
-// 						Value: snapshot.LatestUpdateDate.Format(time.DateOnly),
-// 					},
-// 					"cargoCarried": &types.AttributeValueMemberSS{
-// 						Value: snapshot.CargoCarried,
-// 					},
-// 				},
-// 			},
-// 		}
-
-// 		writeRequests = append(writeRequests, writeRequest)
-// 	}
-
-//		return writeRequests
-//	}
 func generateWriteRequests(snapshots *[]safer.CompanySnapshot) []types.WriteRequest {
 	var writeRequests []types.WriteRequest
 
@@ -136,7 +69,17 @@ func generateWriteRequests(snapshots *[]safer.CompanySnapshot) []types.WriteRequ
 			item["cargoCarried"] = &types.AttributeValueMemberSS{Value: snapshot.CargoCarried}
 		}
 		if len(snapshot.MCMXFFNumbers) > 0 {
-			item["mcmxNumbers"] = &types.AttributeValueMemberSS{Value: snapshot.MCMXFFNumbers}
+			mcmxNumberSet := make(map[string]bool)
+			for _, number := range snapshot.MCMXFFNumbers {
+				mcmxNumberSet[number] = true
+			}
+
+			uniqueMCMXNumbers := make([]string, 0, len(mcmxNumberSet))
+			for number := range mcmxNumberSet {
+				uniqueMCMXNumbers = append(uniqueMCMXNumbers, number)
+			}
+
+			item["mcmxNumbers"] = &types.AttributeValueMemberSS{Value: uniqueMCMXNumbers}
 		}
 		if len(item) > 0 {
 			writeRequest := types.WriteRequest{

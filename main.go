@@ -15,6 +15,7 @@ func main() {
 	var successCount int
 	var currentArrayCount int
 	var snapshots []safer.CompanySnapshot
+
 	for mcmx := 404; mcmx <= 200000; mcmx++ {
 		snapshot, err := client.GetCompanyByMCMX(fmt.Sprintf("%d", mcmx))
 		if err != nil {
@@ -26,6 +27,7 @@ func main() {
 		}
 
 		snapshots = append(snapshots, *snapshot)
+		currentArrayCount = len(snapshots)
 
 		if len(snapshots) == 25 {
 			err = operations.PutItem(&snapshots)
@@ -35,7 +37,6 @@ func main() {
 			}
 			// Clear the snapshots slice for the next batch
 			snapshots = nil
-			currentArrayCount = len(snapshots)
 		}
 		successCount++
 
